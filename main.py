@@ -1,29 +1,30 @@
 import os
 import requests
-import google.generativeai as genai
+from google import genai
 
-# 1. 初始化配置
+# 1. 读取环境变量
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 APP_TOKEN = os.environ.get("WXPUSHER_APP_TOKEN")
 USER_UID = os.environ.get("WXPUSHER_UID")
 
-# 2. 调用 Gemini 生成新闻
+# 2. 初始化 Gemini 客户端
+client = genai.Client(api_key=GEMINI_API_KEY)
+
 def get_daily_stock_news():
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    
     prompt = """
     请整理今天美股最新的50条英文要闻与市场动态。
     格式要求：
     1. 使用 HTML 格式输出（不要 markdown 代码块，直接返回 <h3> 和 <ul>/<li> 标签）。
-    2. 按分类整理（如 Macro, Tech, Energy 等）。
+    2. 按分类整理（如 Macro & Geopolitics, Tech & AI, Energy, Healthcare 等）。
     3. 每条新闻保留英文原文，并附带简短中文翻译与点评。
     """
     
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=prompt
+    )
     return response.text
 
-# 3. 发送到 WxPusher
 def send_to_wxpusher(content):
     url = "http://wxpusher.zhengxianbao.com/api/send/message"
     payload = {
