@@ -2,7 +2,7 @@ name: Daily Stock News Push
 
 on:
   schedule:
-    # 每天 UTC 12:00（即美股收盘后/北京时间早上 6:00，可根据需要调整）
+    # 每天 UTC 12:00 运行（对应夏令时美东时间 8:00 AM / 北京时间 20:00）
     - cron: '0 12 * * *'
   workflow_dispatch: # 支持手动点击运行测试
 
@@ -11,15 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
+          pip install --upgrade pip
           pip install requests google-genai
 
       - name: Run news generator and push
