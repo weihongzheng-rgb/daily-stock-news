@@ -26,7 +26,7 @@ def get_daily_stock_news():
     return response.text
 
 def send_to_wxpusher(content):
-    url = "http://wxpusher.zhengxianbao.com/api/send/message"
+    url = "https://wxpusher.zjiecode.com/api/send/message"
     payload = {
         "appToken": APP_TOKEN,
         "content": content,
