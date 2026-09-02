@@ -12,6 +12,7 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 def get_daily_stock_news():
     prompt = """
+    先更新今天是美国东部时间的什么时候。
     请整理今天美股最新的18条到50条中英文要闻与市场动态，美国宏观经济，美股当天新闻，重要上市公司新闻，异动股等。
     只整理48小时内的最新资料，过滤48小时以前的。
     格式要求：
