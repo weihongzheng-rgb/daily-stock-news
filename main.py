@@ -12,11 +12,12 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 def get_daily_stock_news():
     prompt = """
-    请整理今天美股最新的50条英文要闻与市场动态。
+    请整理今天美股最新的18条到50条中英文要闻与市场动态，美国宏观经济，美股当天新闻，重要上市公司新闻，异动股等。
+    只整理48小时内的最新资料，过滤48小时以前的。
     格式要求：
     1. 使用 HTML 格式输出（不要 markdown 代码块，直接返回 <h3> 和 <ul>/<li> 标签）。
     2. 按分类整理（如 Macro & Geopolitics, Tech & AI, Energy, Healthcare 等）。
-    3. 每条新闻保留英文原文，并附带简短中文翻译与点评。
+    3. 每条新闻保留英文原文，并附带简短中文翻译与点评，发布日期时间也要带上。
     """
     
     response = client.models.generate_content(
