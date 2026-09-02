@@ -1,6 +1,8 @@
+from datetime import datetime
 import os
 import requests
 from google import genai
+from google.genai import types
 
 # 1. 读取环境变量
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -10,9 +12,13 @@ USER_UID = os.environ.get("WXPUSHER_UID")
 # 2. 初始化 Gemini 客户端
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+
 def get_daily_stock_news():
-    prompt = """
-    先更新今天是美国东部时间的什么时候。
+    # 动态获取每天运行时的最新日期（格式：2026年09月02日）
+    today_str = datetime.now().strftime("%Y年%m月%d日")
+
+    prompt = f"""
+    今天是美东时间 {today_str}。
     请整理今天美股最新的18条到50条中英文要闻与市场动态，美国宏观经济，美股当天新闻，重要上市公司新闻，异动股等。
     只整理48小时内的最新资料，过滤48小时以前的。
     格式要求：
@@ -20,12 +26,17 @@ def get_daily_stock_news():
     2. 按分类整理（如 Macro & Geopolitics, Tech & AI, Energy, Healthcare 等）。
     3. 每条新闻保留英文原文，并附带简短中文翻译与点评，发布日期时间也要带上。
     """
-    
+
+    # 传入 config 参数开启 Google Search 联网搜索
     response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=prompt
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            tools=[{"google_search": {}}]  # 开启实时联网搜索
+        ),
     )
     return response.text
+
 
 def send_to_wxpusher(content):
     url = "https://wxpusher.zjiecode.com/api/send/message"
@@ -33,12 +44,13 @@ def send_to_wxpusher(content):
         "appToken": APP_TOKEN,
         "content": content,
         "contentType": 2,  # 2 代表 HTML 格式
-        "summary": "今日美股50条最新动态",
-        "uids": [USER_UID]
+        "summary": "今日美股最新动态",
+        "uids": [USER_UID],
     }
-    headers = {'Content-Type': 'application/json'}
+    headers = {"Content-Type": "application/json"}
     res = requests.post(url, json=payload)
     print("推送结果：", res.json())
+
 
 if __name__ == "__main__":
     news_html = get_daily_stock_news()
